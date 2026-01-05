@@ -12,8 +12,6 @@ As a Node.js developer, I deeply value good quality toolings that facilitates th
 
 So, I decided to take a step towards bring better support for Cassandra in the community.
 
----
-
 ## Features
 
 - Full-document synchronization.
@@ -22,8 +20,6 @@ So, I decided to take a step towards bring better support for Cassandra in the c
 - AST-aware cursor position analysis.
 - Structured markdown documentation for completion itmes.
 - Designed for NeoVim, VS Code, and other LSP-compatible editors.
-
----
 
 ## Roadmap
 
@@ -35,8 +31,6 @@ So, I decided to take a step towards bring better support for Cassandra in the c
 - [ ] Semantic analysis.
 - [ ] Formatting
 - [ ] Hover supports.
-
----
 
 ## Running the Server
 
@@ -60,8 +54,6 @@ cargo run
 
 The server communicates over `stdio` (`stdin`/`stdout`) as per Microsoft's LSP specs.
 
----
-
 ## Example NeoVim Setup
 
 ```LUA
@@ -74,13 +66,11 @@ vim.lsp.enable("cqlls") -- Enabling it manually
 vim.lsp.set_log_level("debug") -- Important for debugging
 ```
 
----
-
 ## Logging & Debugging
 
 Due to the `vim.lsp.set_log_level` line, NeoVim will log LSP communication messages into a file.
 
-> ![NOTE]
+> [!NOTE]
 > The path is usually `/home/user/.local/state/nvim/lsp.log` on Linux.
 
 Type `:LspInfo` to check that both the server is active and running correctly, and for the path of the LSP log file.
@@ -93,15 +83,11 @@ tail -f /home/user/.local/state/nvim/lsp.log
 
 Messages are logged using `client.log_message` in tower-lsp, which according to the docs corresponds to `window/logMessage` as per [Microsoft's LSP specs](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#window_logMessage).
 
----
-
 ## Status
 
 **Experimental / Work in Progress**
 
 The project is under active development and APIs may change frequently.
-
----
 
 ## Contributing
 

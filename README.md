@@ -6,11 +6,11 @@ This project marks a significant step in building a community-driven extensible 
 
 ## Why?
 
-Working on a Node.js project that relies heavily on Cassandra, I realized I've been going through a lot of hassle, from the lack of good quality ORMs or query builders all the way to Tree Sitter parsers and language servers.
+Working on a Node.js project that relies heavily on Cassandra, I realized the tooling is significantly lacking behind compared to SQL and noSQL support; From the lack of ORMs or query builders to tree-sitter parsers and language server support.
 
-As a Node.js developer, I deeply value good quality toolings that facilitates the developers work; and as a Rustacean I believe I can do something for it; and as a Cassandra user I believe it's an amazing database that definitely deserve being recognized more in the developers community.
+As a Node.js developer, I deeply value robust developer tooling. As a Rustacean, I believe I can contribute meaningfully in that space. And as a Cassandra user, I consider it a powerful yet underappreciated database that deserves better recognition in the community.
 
-So, I decided to take a step towards bring better support for Cassandra in the community.
+This project is a step toward improving Cassandra's tooling ecosystem and making it more hassle-free database.
 
 ## Features
 
@@ -18,7 +18,7 @@ So, I decided to take a step towards bring better support for Cassandra in the c
 - Tree-sitter-based parsing (currently via `tttx_tree_sitter_cql`).
 - Keyword auto-completion (testing support for `CREATE` statements).
 - AST-aware cursor position analysis.
-- Structured markdown documentation for completion itmes.
+- Structured markdown documentation for completion items.
 - Designed for NeoVim, VS Code, and other LSP-compatible editors.
 
 ## Roadmap

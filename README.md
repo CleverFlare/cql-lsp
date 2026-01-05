@@ -37,7 +37,7 @@ This project is a step toward improving Cassandra's tooling ecosystem and making
 ### Prerequisites
 
 - Rust (stable)
-- Tree-sitter CQL grammar (current `tttx_tree_sitter_cql`)
+- Tree-sitter CQL grammar (currently `tttx_tree_sitter_cql`)
 - An LSP-compatible editor (e.g., NeoVim)
 
 ### Build

@@ -2,7 +2,10 @@
 
 This project is an experimental LSP (Language Server Protocol) implementation for CQL (Cassandra Query Language), written in Rust using tower-lsp and tree-sitter.
 
-This project marks a significant step in building a community-driven extensible foundation for CQL tooling, including parsing, document management, and context-aware completions.
+In this project, I'm attempting to bring proper code editing support for CQL, including parsing, document management, and context-aware schema-aware completions.
+
+> [!NOTE]
+> I've recently started making my own CQL tree-sitter grammar called tree_sitter_cql3 for parsing CQL statements. Check out [here](https://github.com/CleverFlare/tree-sitter-cql3).
 
 ## Why?
 
@@ -14,12 +17,13 @@ This project is a step toward improving Cassandra's tooling ecosystem and making
 
 ## Features
 
-- Full-document synchronization.
-- Tree-sitter-based parsing (currently via `tttx_tree_sitter_cql`).
-- Keyword auto-completion (testing support for `CREATE` statements).
-- AST-aware cursor position analysis.
-- Structured markdown documentation for completion items.
-- Designed for NeoVim, VS Code, and other LSP-compatible editors.
+- Full-document synchronization
+- Incremental document updates for blazingly fast parsing
+- Tree-sitter-based parsing ([`tree_sitter_cql3`](https://github.com/CleverFlare/tree-sitter-cql3))
+- Keyword auto-completion (testing support for `CREATE` statements)
+- AST-aware cursor position analysis
+- Structured markdown documentation for completion items
+- Designed for NeoVim, VS Code, and other LSP-compatible editors
 
 ## Roadmap
 
@@ -37,7 +41,7 @@ This project is a step toward improving Cassandra's tooling ecosystem and making
 ### Prerequisites
 
 - Rust (stable)
-- Tree-sitter CQL grammar (currently `tttx_tree_sitter_cql`)
+- Tree-sitter CQL grammar ([`tree_sitter_cql3`](https://github.com/CleverFlare/tree-sitter-cql3))
 - An LSP-compatible editor (e.g., NeoVim)
 
 ### Build

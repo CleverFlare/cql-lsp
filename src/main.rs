@@ -1,5 +1,7 @@
-use lsp_document::{IndexedText, TextAdapter, TextMap};
-use std::collections::HashMap;
+mod document;
+
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::RwLock;
 use tower_lsp::{
     Client, LanguageServer, LspService, Server,
     jsonrpc::Result,
@@ -8,20 +10,16 @@ use tower_lsp::{
         CompletionResponse, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
         DidOpenTextDocumentParams, Documentation, InitializeParams, InitializeResult,
         InitializedParams, MarkupContent, MarkupKind, MessageType, ServerCapabilities,
-        TextDocumentSyncCapability, TextDocumentSyncKind,
+        TextDocumentSyncCapability, TextDocumentSyncKind, Url,
     },
 };
-use tree_sitter::{Node, Parser, Point, Tree};
+use tree_sitter::Node;
 
-struct DocumentState {
-    parser: Parser,
-    tree: Option<Tree>,
-    text: String,
-}
+use crate::document::TextDocument;
 
 struct Backend {
     client: Client,
-    documents: tokio::sync::Mutex<HashMap<String, DocumentState>>, // uri -> document
+    map: Arc<RwLock<HashMap<Url, TextDocument>>>, // uri -> document
 }
 
 /// Walk up the AST parents starting from `node` and return:
@@ -74,129 +72,44 @@ impl LanguageServer for Backend {
     }
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        let uri = params.text_document.uri.to_string();
+        let uri = params.text_document.uri;
+
         self.client
             .log_message(MessageType::INFO, format!("Open URI: {}", uri))
             .await;
+
         let text = params.text_document.text.clone();
 
-        let mut parser = tree_sitter::Parser::new();
+        let mut wr = self.map.write().await;
 
-        let language = tttx_tree_sitter_cql::LANGUAGE;
-
-        parser
-            .set_language(&language.into())
-            .expect("Error loading CQL parser");
-
-        let tree = parser.parse(&text, None);
-
-        let state = DocumentState { parser, tree, text };
-
-        self.documents.lock().await.insert(uri, state);
+        wr.insert(uri, TextDocument::new(&text));
     }
 
     async fn did_close(&self, params: DidCloseTextDocumentParams) {
-        let uri = params.text_document.uri.to_string();
+        let uri = params.text_document.uri;
 
-        self.documents.lock().await.remove(&uri);
+        let mut wr = self.map.write().await;
+
+        wr.remove(&uri);
     }
 
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        let uri = params.text_document.uri.to_string();
+        let uri = params.text_document.uri;
 
-        if params.content_changes.len() > 1 {
-            self.client
-                .log_message(
-                    MessageType::INFO,
-                    "Incremental changes is not yet supported",
-                )
-                .await;
+        let mut wr = self.map.write().await;
 
-            return;
-        }
-
-        let content = params.content_changes[0].text.clone();
-
-        let mut docs = self.documents.lock().await;
-
-        if let Some(doc) = docs.get_mut(&uri) {
-            let new_tree = doc.parser.parse(&content, None);
-
-            self.client
-                .log_message(
-                    MessageType::INFO,
-                    format!(
-                        "NEW TREE: {}",
-                        new_tree.as_ref().unwrap().root_node().to_sexp()
-                    ),
-                )
-                .await;
-
-            doc.tree = new_tree;
-
-            doc.text = content;
+        if let Some(doc) = wr.get_mut(&uri) {
+            for change in params.content_changes {
+                doc.apply_content_change(change, document::PositionEncodingKind::UTF16)
+                    .unwrap();
+            }
         }
     }
 
-    async fn completion(&self, params: CompletionParams) -> Result<Option<CompletionResponse>> {
-        let uri = params.text_document_position.text_document.uri.to_string();
-
-        let position = params.text_document_position.position;
-
-        let docs = self.documents.lock().await;
-
-        let doc = match docs.get(&uri) {
-            Some(d) => d,
-            None => {
-                self.client
-                    .log_message(MessageType::INFO, "Returning early")
-                    .await;
-
-                return Ok(None);
-            }
-        };
-
-        let tree = match &doc.tree {
-            Some(t) => t,
-            None => return Ok(None),
-        };
-
-        let text = &doc.text;
-        let text = IndexedText::new(text.clone());
-
-        let root_node = tree.root_node();
-
-        let position = text.lsp_pos_to_pos(&position).unwrap();
-
-        let offset = text.pos_to_offset(&position).unwrap();
-
-        let ts_point = Point {
-            row: position.line as usize,
-            column: position.col as usize,
-        };
-
-        self.client
-            .log_message(MessageType::INFO, format!("Position {:?}", ts_point))
-            .await;
-
-        let node = root_node.descendant_for_byte_range(offset, offset);
-
-        if node.is_none() {
-            self.client
-                .log_message(
-                    MessageType::INFO,
-                    "Cannot find a node corresponding to the cursor position",
-                )
-                .await;
-        }
-
-        self.client
-            .log_message(MessageType::INFO, root_node.to_sexp())
-            .await;
-
-        self.client
-            .log_message(MessageType::INFO, node.unwrap().to_sexp())
-            .await;
+    async fn completion(&self, _params: CompletionParams) -> Result<Option<CompletionResponse>> {
+        // let uri = params.text_document_position.text_document.uri.to_string();
+        //
+        // let position = params.text_document_position.position;
 
         let completions = vec![
                 CompletionItem {
@@ -249,7 +162,7 @@ async fn main() {
     let stdout = tokio::io::stdout();
     let (service, socket) = LspService::new(|client| Backend {
         client,
-        documents: Default::default(),
+        map: Default::default(),
     });
 
     Server::new(stdin, stdout, socket).serve(service).await;

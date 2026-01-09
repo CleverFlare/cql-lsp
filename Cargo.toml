@@ -6,8 +6,11 @@ edition = "2024"
 [dependencies]
 anyhow = "1.0.100"
 lsp-document = { path = "vendor/lsp-document" }
+ropey = "1.6.1"
 serde = "1.0.228"
+thiserror = "2.0.17"
 tokio = { version = "1.48.0", features = ["full"] }
 tower-lsp = "0.20.0"
 tree-sitter = "0.26.3"
+tree-sitter-cql3 = { path = "/home/flare/Documents/node.js/tree-sitter-cql3" }
 tttx-tree-sitter-cql = "1.0.0"

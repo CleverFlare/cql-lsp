@@ -5,7 +5,7 @@ This project is an experimental LSP (Language Server Protocol) implementation fo
 In this project, I'm attempting to bring proper code editing support for CQL, including parsing, document management, and context-aware schema-aware completions.
 
 > [!NOTE]
-> I've recently started making my own CQL tree-sitter grammar called tree_sitter_cql3 for parsing CQL statements. Check out [here](https://github.com/CleverFlare/tree-sitter-cql3).
+> I've recently started making my own CQL tree-sitter grammar called tree_sitter_cql3 for parsing CQL statements. Check it out [here](https://github.com/CleverFlare/tree-sitter-cql3).
 
 ## Why?
 
